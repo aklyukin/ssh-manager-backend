@@ -5,8 +5,13 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/aklyukin/ssh-manager-backend/structures"
+	"log"
 )
 
+type LoginJSON struct {
+	User     string `json:"user" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
 
 func PostServer(c *gin.Context) {
 	dbConn, ok := c.MustGet("databaseConn").(*gorm.DB)
@@ -124,8 +129,12 @@ func PostUser(c *gin.Context) {
 	}
 
 	var user structures.Users
-	c.Bind(&user)
 
+	var sshkey string
+	c.BindJSON(&sshkey)
+	log.Printf(sshkey)
+
+	c.Bind(&user)
 	if user.UserName != "" {
 		dbConn.Create(&user)
 		c.JSON(201, gin.H{"success": user})
